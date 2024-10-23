@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    hostname: 'postgres-db'
+    ports:
+      - '5432:5432'
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5432 -d postgres" ]
+      interval: 2s
+      timeout: 10s
+      retries: 2
+      start_period: 10s
+    networks:
+      - fedinet
+
+volumes:
+  data:
+    driver: local
+
+networks:
+  fedinet:
+    name: compose_network

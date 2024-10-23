@@ -1,0 +1,33 @@
+include:
+  - ../../storage/minio/compose.yml
+  - ../../storage/postgres/compose.yml
+
+services:
+  hive-metastore:
+    image: 'apache/hive:4.0.1'
+    hostname: hive-metastore
+    ports:
+      - '9083:9083' # Metastore Thrift
+    volumes:
+      - ./conf/metastore-site.xml:/opt/hive/conf/metastore-site.xml:ro
+      - ./lib/postgresql-42.7.4.jar:/opt/hive/lib/postgres.jar
+    environment:
+      HIVE_AUX_JARS_PATH: /opt/hadoop/share/hadoop/tools/lib/hadoop-aws-3.3.6.jar:/opt/hadoop/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.367.jar
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: '
+        -Xmx1G 
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres-db:5432/metastore_db
+        -Djavax.jdo.option.ConnectionUserName=postgres
+        -Djavax.jdo.option.ConnectionPassword=password'
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fedinet
+
+networks:
+  fedinet:
+    name: compose_network

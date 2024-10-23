@@ -1,0 +1,18 @@
+include:
+  - catalog/iceberg/lakekeeper/compose.yml
+  - catalog/hive/compose.yml
+
+services:
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    environment:
+      - CATALOG_MANAGEMENT=dynamic
+    ports:
+      - '8080:8080'
+    networks:
+      - fedinet
+
+networks:
+  fedinet:
+    name: compose_network
