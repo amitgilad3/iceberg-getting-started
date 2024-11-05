@@ -1,4 +1,4 @@
-# Chill Data Summit 2024 NY workshop
+# Chill Data Summit 2024 TA workshop
 
 ## Requirements
 
