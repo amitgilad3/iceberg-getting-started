@@ -103,6 +103,7 @@ WITH (
   "fs.native-s3.enabled" = 'true',
   "s3.region"= 'local-1',
   "s3.path-style-access" = 'true',
+  "iceberg.register-table-procedure.enabled"= 'true',
   "s3.endpoint" = 'http://s3gateway:9000',
   "s3.aws-access-key" = 'storage',
   "s3.aws-secret-key" = 'storage123'
@@ -196,18 +197,16 @@ WITH (
 Now convert the CSV data to Parquet and proper Hive data types along with partitioning and clustering for read efficiency.
 
 ```
-CREATE TABLE hive.pokemon.pokedex 
+CREATE TABLE iceberg.pokemon.pokedex 
 WITH (
   format = 'PARQUET',
-  partitioned_by = ARRAY['type1'],
-  bucketed_by = ARRAY['type2'],
-  bucket_count = 2,
-  external_location = 's3a://databucks/pokemon/pokedex'
+  partitioning = ARRAY['type1'],
+  location = 's3://databucks/pokemon/pokedex'
 ) AS
 SELECT
   CAST(number AS INTEGER) AS number,
   name,
-  "Type 1" AS type1,
+  "Type 1" AS type1
   "Type 2" AS type2,
   CAST(json_parse(replace(replace(Abilities, '''s', 's'), '''', '"')) AS ARRAY(VARCHAR)) AS abilities,
   CAST(hp AS INTEGER) AS hp,
@@ -248,34 +247,11 @@ SELECT
   CAST("Against Fairy" AS DOUBLE) AS against_fairy,
   CAST("Height" AS DOUBLE) AS height,
   CAST("Weight" AS DOUBLE) AS weight,
-  CAST("BMI" AS DOUBLE) AS bmi
+  CAST("BMI" AS DOUBLE) AS bmi,
+
 FROM hive.pokemon.pokedex_csv;
 ```
-Let's just take a look at the data. 
-
+# Optimize
 ```
-SELECT * FROM hive.pokemon.pokedex LIMIT 50;
+ALTER TABLE iceberg.pokemon.pokedex EXECUTE optimize;
 ```
-
-Since Hive and Iceberg share the same data storage location, they should both be able to access that data right?
-
-```
-SELECT * FROM iceberg.pokemon.pokedex LIMIT 50;
-```
-
-Let's migrate the `hive.pokemon.pokedex` table to `iceberg.pokemon.pokedex` catalog.
-
-```
-CALL iceberg.system.register_table(
-  schema_name => 'pokemon', 
-  table_name => 'pokedex', 
-  table_location => 's3://databucks/pokemon/pokedex'
-);
-```
-
-docker run --rm -it \
-  -e AWS_ACCESS_KEY_ID=storage \
-  -e AWS_SECRET_ACCESS_KEY=storage123 \
-  --network compose_network \
-  amazon/aws-cli s3api help
-  
