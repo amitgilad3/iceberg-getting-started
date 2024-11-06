@@ -206,7 +206,7 @@ WITH (
 SELECT
   CAST(number AS INTEGER) AS number,
   name,
-  "Type 1" AS type1
+  "Type 1" AS type1,
   "Type 2" AS type2,
   CAST(json_parse(replace(replace(Abilities, '''s', 's'), '''', '"')) AS ARRAY(VARCHAR)) AS abilities,
   CAST(hp AS INTEGER) AS hp,
@@ -247,7 +247,7 @@ SELECT
   CAST("Against Fairy" AS DOUBLE) AS against_fairy,
   CAST("Height" AS DOUBLE) AS height,
   CAST("Weight" AS DOUBLE) AS weight,
-  CAST("BMI" AS DOUBLE) AS bmi,
+  CAST("BMI" AS DOUBLE) AS bmi
 
 FROM hive.pokemon.pokedex_csv;
 ```
