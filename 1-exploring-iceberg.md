@@ -1,4 +1,4 @@
-# Chill Data Summit 2024 NY workshop
+# Exploring Iceberg
 
 ## Requirements
 
@@ -71,7 +71,7 @@ Verify the warehouse is created.
 ```
 curl -X GET -v \
      -H "Content-Type: application/json" \
-     http://localhost:8181/management/v1/warehouse?project-id=00000000-0000-0000-0000-000000000000
+     http://localhost:8181/management/v1/warehouse?project-id=00000000-0000-0000-0000-000000000000 | jq
 ```
 
 Go take a moment to log into the [object storage UI](http://localhost:9000) and check the structure under the main bucket used. Then log into the Trino CLI.
@@ -263,13 +263,26 @@ Since Hive and Iceberg share the same data storage location, they should both be
 SELECT * FROM iceberg.pokemon.pokedex LIMIT 50;
 ```
 
+Let's dig around in the metadata using our Iceberg REST catalog. First, let's check what namespaces exist. We need to get the warehouse id from lakekeeper first.
+
+```
+export WAREHOUSE_ID=$(curl -q -H "Content-Type: application/json" \
+     http://localhost:8181/management/v1/warehouse?project-id=00000000-0000-0000-0000-000000000000 | jq -r .warehouses[0].id)
+```
+
+Now we'll switch away from Lakekeeper's `/management` endpoint to `/catalog` endpoint which acts like the regular Iceberg REST catalog.
+
+```
+curl -v -H "Content-Type: application/json" http://localhost:8181/catalog/v1/${WAREHOUSE_ID}/namespaces
+```
+
 Let's migrate the `hive.pokemon.pokedex` table to `iceberg.pokemon.pokedex` catalog.
 
 ```
-CALL iceberg.system.register_table(
+CALL iceberg.system.migrate(
   schema_name => 'pokemon', 
-  table_name => 'pokedex', 
-  table_location => 's3://databucks/pokemon/pokedex'
+  table_name => 'pokedex',
+  recursive_directory => 'true'
 );
 ```
 
