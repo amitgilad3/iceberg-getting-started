@@ -4,7 +4,7 @@ include:
 
 services:
   lakekeeper:
-    image: 'quay.io/lakekeeper/catalog:latest'
+    image: 'quay.io/lakekeeper/catalog:latest-main'
     environment:
       - ICEBERG_REST__BASE_URI=http://lakekeeper:8181
       - ICEBERG_REST__LISTEN_PORT=8181
@@ -29,7 +29,7 @@ services:
       - fedinet
 
   migrate:
-    image: 'quay.io/lakekeeper/catalog:latest'
+    image: 'quay.io/lakekeeper/catalog:latest-main'
     environment:
       - ICEBERG_REST__PG_ENCRYPTION_KEY=This-is-NOT-Secure!
       - ICEBERG_REST__PG_DATABASE_URL_READ=postgresql://postgres:password@postgres-db:5432/iceberg

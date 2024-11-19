@@ -207,7 +207,6 @@ WITH (
 SELECT
   CAST(number AS INTEGER) AS number,
   name,
-  "Type 1" AS type1,
   "Type 2" AS type2,
   CAST(json_parse(replace(replace(Abilities, '''s', 's'), '''', '"')) AS ARRAY(VARCHAR)) AS abilities,
   CAST(hp AS INTEGER) AS hp,
@@ -248,10 +247,11 @@ SELECT
   CAST("Against Fairy" AS DOUBLE) AS against_fairy,
   CAST("Height" AS DOUBLE) AS height,
   CAST("Weight" AS DOUBLE) AS weight,
-  CAST("BMI" AS DOUBLE) AS bmi
+  CAST("BMI" AS DOUBLE) AS bmi,
+  "Type 1" AS type1
 FROM hive.pokemon.pokedex_csv;
 ```
-Let's just take a look at the data. 
+Notice that becuase we are partitioning the Hive data, it requires us to place the partitioned column at the end of the list, requiring users to understand storage details of the data layout. Let's just take a look at the data. 
 
 ```
 SELECT * FROM hive.pokemon.pokedex LIMIT 50;
@@ -279,7 +279,7 @@ curl -v -H "Content-Type: application/json" http://localhost:8181/catalog/v1/${W
 Let's migrate the `hive.pokemon.pokedex` table to `iceberg.pokemon.pokedex` catalog.
 
 ```
-CALL iceberg.system.migrate(
+CALL hive.system.migrate(
   schema_name => 'pokemon', 
   table_name => 'pokedex',
   recursive_directory => 'true'
