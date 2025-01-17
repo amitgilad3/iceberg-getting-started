@@ -83,10 +83,9 @@ docker container exec -it iceberg-getting-started-trino-coordinator-1 trino
 Create hive` and `iceberg` catalogs using the Hive Metastore and Lakekeeper. We will use the Hive data to migrate data in the Hive format to Iceberg.
 
 ```
-CREATE CATALOG hive USING hive
+CREATE CATALOG hive USING iceberg
 WITH (
   "hive.metastore.uri" = 'thrift://hive-metastore:9083',
-  "hive.non-managed-table-writes-enabled" = 'true',
   "fs.native-s3.enabled" = 'true',
   "s3.region"= 'local-1',
   "s3.path-style-access" = 'true',
